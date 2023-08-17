@@ -12,12 +12,12 @@ npm start
 ```
 ## 1. Setting Up the Project:
 
-\```
+```
 mkdir mern-auth
 cd mern-auth
 npm init -y #installing node
 npm install express mongoose bcryptjs jsonwebtoken cors
-\```
+```
 
 We're installing:
 - `express` for our server
@@ -62,27 +62,27 @@ If you're just getting started and working from your local machine:
 
 Now, create a `config.js` file:
 
-\```javascript
+```javascript
 module.exports = {
     MONGO_URI: 'YOUR_MONGODB_CONNECTION_STRING',
     JWT_SECRET: 'YOUR_RANDOM_SECRET_FOR_JWT'
 };
-\```
+```
 
 ## 3. Implementing the API:
 
 **models/User.js**:
 
-\```javascript
+```javascript
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 // ... [rest of the code]
-\```
+```
 
 **server.js**:
 
-\```javascript
+```javascript
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
