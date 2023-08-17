@@ -1,9 +1,13 @@
-# SYPlaytus-testing
+# SYPlaytus
 This project is primarily for SY-Playtus developers to learn and is not for actual production use.
 
 # Setting Up a Node.js Backend Service
 
 To set up a Node.js backend service, you need to follow the steps below:
+
+## To Run the Backend
+npm install
+npm start
 
 ## 1. Setting Up the Project:
 
