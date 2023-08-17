@@ -21,7 +21,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.use(cors());
 app.use(express.json());
 
-// Sign Up
+// Normal Users Sign Up
 app.post('/signup', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -35,7 +35,21 @@ app.post('/signup', async (req, res) => {
 });
 
 
-// Log In
+// Admin Signup
+app.post('/admin/signup', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = new User({ username, password, isAdmin: true }); // Set isAdmin to true for admin
+        await user.save();
+        res.status(200).send('Admin registered');
+    } catch (error) {
+        console.error('Admin Signup Error:', error);
+        res.status(500).send('Error registering admin');
+    }
+});
+
+
+// Log In(For All Users)
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -48,23 +62,69 @@ app.post('/login', async (req, res) => {
         const token = jwt.sign({ userId: user.id }, JWT_SECRET);
         res.status(200).send({ token });
     } catch (error) {
+        console.error("Login error:", error);
         res.status(500).send('Error logging in');
     }
 });
 
-// Browse Users (protected)
-app.get('/users', async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (!token) return res.status(401).send('Unauthorized');
-
+// Delete User (Admin only)
+app.delete('/user/:id', async (req, res) => {
     try {
-        jwt.verify(token, JWT_SECRET);
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) return res.status(401).send('Unauthorized');
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const adminUser = await User.findById(decoded.userId);
+
+        if (!adminUser || !adminUser.isAdmin) {
+            return res.status(403).send('Forbidden');
+        }
+
+        await User.findByIdAndDelete(req.params.id);
+        res.status(200).send('User deleted');
+    } catch (error) {
+        console.error('Delete User Error:', error);
+        res.status(500).send('Error deleting user');
+    }
+});
+
+
+
+// Browse Users (protected)
+// app.get('/users', async (req, res) => {
+//     const token = req.headers.authorization.split(' ')[1];
+//     if (!token) return res.status(401).send('Unauthorized');
+
+//     try {
+//         jwt.verify(token, JWT_SECRET);
+//         const users = await User.find({}, 'username');  // Return only the usernames
+//         res.status(200).send(users);
+//     } catch (error) {
+//         res.status(500).send('Error fetching users');
+//     }
+// });
+
+// Browse Users (Admin only now)
+app.get('/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) return res.status(401).send('Unauthorized');
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const adminUser = await User.findById(decoded.userId);
+
+        if (!adminUser || !adminUser.isAdmin) {
+            return res.status(403).send('Forbidden');
+        }
+
         const users = await User.find({}, 'username');  // Return only the usernames
         res.status(200).send(users);
     } catch (error) {
+        console.error('Browse Users Error:', error);
         res.status(500).send('Error fetching users');
     }
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
